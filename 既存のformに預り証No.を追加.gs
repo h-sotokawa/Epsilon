@@ -26,16 +26,25 @@ function addFieldToFormsInFolder() {
         const form = FormApp.openById(formId);
         console.log(`Form '${form.getTitle()}' の処理を開始します。`, new Date());
 
-        // フォームのセクションを取得
+        // フォームの質問をチェックし、既に「預かり証No.」が存在するか確認
         const items = form.getItems();
+        const fieldExists = items.some(item => 
+          item.getType() === FormApp.ItemType.TEXT && item.asTextItem().getTitle() === "預かり証No."
+        );
+        
+        if (fieldExists) {
+          console.log(`Form '${form.getTitle()}' には既に「預かり証No.」が存在します。処理をスキップします。`, new Date());
+          continue;
+        }
+
+        // セクションをチェックし、セクション2の開始インデックスを特定
         let section2StartIndex = -1;
         let sectionCount = 0;
         
-        // セクションブレークを数えることでセクション2の開始インデックスを特定
         for (let i = 0; i < items.length; i++) {
           if (items[i].getType() === FormApp.ItemType.PAGE_BREAK) {
             sectionCount++;
-            if (sectionCount === 1) {  // 修正：セクションカウントを1に変更
+            if (sectionCount === 1) {  // セクションカウントを1に変更
               section2StartIndex = i;
               break;
             }
